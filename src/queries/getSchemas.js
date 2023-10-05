@@ -1,15 +1,14 @@
 const db = require('../db');
 
-const baseQuery = `select nspname from pg_catalog.pg_namespace pn`;
+const baseQuery = 'select nspname from pg_catalog.pg_namespace pn';
 
 // must conform to Postgres LIKE/NOT LIKE regex syntax, see https://www.postgresql.org/docs/9.3/functions-matching.html
 const systemSchemas = ['pg_%', 'information%'];
 
 // TODO: tests!
 const getWhereClause = (includeSchemas, skipSchemas) => {
-  const includeSchemaConditions =
-    includeSchemas &&
-    includeSchemas.reduce((acc, skipThisSchema, idx, arr) => {
+  const includeSchemaConditions = includeSchemas
+    && includeSchemas.reduce((acc, skipThisSchema, idx, arr) => {
       const addOr = idx === arr.length - 1 ? '' : ' OR ';
 
       return `${acc}pn.nspname LIKE '${skipThisSchema}'${addOr}`;
@@ -26,9 +25,15 @@ const getWhereClause = (includeSchemas, skipSchemas) => {
   const whereClauseBits = [];
   let whereClause = '';
 
-  if (includeSchemaConditions) whereClauseBits.push(`(${includeSchemaConditions})`);
-  if (includeSchemaConditions && excludeSchemaConditions) whereClauseBits.push('AND');
-  if (excludeSchemaConditions) whereClauseBits.push(`(${excludeSchemaConditions})`);
+  if (includeSchemaConditions) {
+    whereClauseBits.push(`(${includeSchemaConditions})`);
+  }
+  if (includeSchemaConditions && excludeSchemaConditions) {
+    whereClauseBits.push('AND');
+  }
+  if (excludeSchemaConditions) {
+    whereClauseBits.push(`(${excludeSchemaConditions})`);
+  }
 
   if (whereClauseBits.length > 0) {
     whereClauseBits.unshift('WHERE');
@@ -48,5 +53,5 @@ module.exports = async function getSchemas(includeSchemas, skipSchemas) {
   // console.log('schemasQuery: ', schemasQuery)
   const res = await db.client.query(schemasQuery);
 
-  return res.rows.map(schema => schema.nspname).sort();
+  return res.rows.map((schema) => schema.nspname).sort();
 };

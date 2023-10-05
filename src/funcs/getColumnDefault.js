@@ -1,5 +1,7 @@
 module.exports = function getColumnDefault(columnDefault, dataType) {
-  if (!columnDefault || columnDefault.includes('::')) return '';
+  if (!columnDefault || columnDefault.includes('::')) {
+    return '';
+  }
   const isFuncRegEx = /\(/;
   const isFunc = isFuncRegEx.test(columnDefault);
 
@@ -7,8 +9,7 @@ module.exports = function getColumnDefault(columnDefault, dataType) {
     return `default: \`${columnDefault}\``;
   }
 
-  const useQuotes =
-    ['varchar', 'character', 'char', 'text', 'timestamp'].findIndex(type => type === dataType) > -1;
+  const useQuotes = ['varchar', 'character', 'char', 'text', 'timestamp'].findIndex(type => type === dataType) > -1;
 
   return useQuotes ? `default: '${columnDefault}'` : `default: ${columnDefault}`;
 };

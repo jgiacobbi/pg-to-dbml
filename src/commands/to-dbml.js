@@ -13,7 +13,7 @@ async function toDbml(argv) {
     } else {
       writeResults(schemaStructures);
     }
-    console.log(`to-dbml finished.`);
+    console.log('to-dbml finished.');
     process.exit(0);
   } catch (err) {
     console.error(err);

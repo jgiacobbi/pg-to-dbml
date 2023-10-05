@@ -3,11 +3,7 @@ const { Client } = require('pg');
 let client;
 
 async function initialize({ dbConnectionString, dbName }) {
-  let connectionString = dbConnectionString;
-  if (dbName) {
-    // Add the database name to the connection string, while tolerating a trailing slash:
-    dbConnectionString = connectionString.replace(/\/?$/, `/${dbName}`);
-  }
+  const connectionString = dbName ? dbConnectionString.replace(/\/?$/, `/${dbName}`) : dbConnectionString;
 
   client = new Client({
     connectionString
@@ -23,5 +19,5 @@ module.exports = {
   get dbName() {
     return client.connectionParameters.database;
   },
-  initialize
+  initialize,
 };

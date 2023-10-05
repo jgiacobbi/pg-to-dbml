@@ -3,13 +3,12 @@ const db = require('../db');
 module.exports = async function getReferencedEnums({ schema, allTableStructures }) {
   const referencedUdtNames = [
     ...new Set(
-      allTableStructures.flatMap(({ structure }) =>
-        structure
-          .filter(column => column.data_type === 'USER-DEFINED')
-          .map(column => column.udt_name)
-      )
-    )
+      allTableStructures.flatMap(({ structure }) => structure
+        .filter((column) => column.data_type === 'USER-DEFINED')
+        .map((column) => column.udt_name)),
+    ),
   ];
+
   if (referencedUdtNames.length === 0) {
     return [];
   }
@@ -23,7 +22,8 @@ module.exports = async function getReferencedEnums({ schema, allTableStructures 
     join pg_catalog.pg_namespace n on n.oid = t.typnamespace
     where n.nspname = $1 and t.typcategory = 'E' and t.typname = ANY($2)
     group by 1, 2`,
-    [schema, referencedUdtNames]
+    [schema, referencedUdtNames],
   );
+
   return rows;
 };

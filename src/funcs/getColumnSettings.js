@@ -1,4 +1,4 @@
-const getColumnDefault = require('./getColumnDefault.js');
+const getColumnDefault = require('./getColumnDefault');
 
 // NOTE: see https://www.dbml.org/docs/#project-definition
 module.exports = function getColumnSettings(col) {
@@ -7,22 +7,30 @@ module.exports = function getColumnSettings(col) {
     column_default: columnDefault,
     is_nullable: isNullable,
     dataType,
-    isPrimary
+    isPrimary,
   } = col;
 
   const columnSettings = [];
 
-  const primaryKeySetting = isPrimary && `primary key`;
-  if (primaryKeySetting) columnSettings.unshift(primaryKeySetting);
+  const primaryKeySetting = isPrimary && 'primary key';
+  if (primaryKeySetting) {
+    columnSettings.unshift(primaryKeySetting);
+  }
 
   const defaultSetting = getColumnDefault(columnDefault, dataType);
-  if (defaultSetting) columnSettings.unshift(defaultSetting);
+  if (defaultSetting) {
+    columnSettings.unshift(defaultSetting);
+  }
 
   const notNullSetting = !isNullable && 'not null';
-  if (notNullSetting) columnSettings.unshift(notNullSetting);
+  if (notNullSetting) {
+    columnSettings.unshift(notNullSetting);
+  }
 
   const note = columnComment && `note: '${columnComment.replace(/'/g, "\\'")}'`;
-  if (note) columnSettings.unshift(note);
+  if (note) {
+    columnSettings.unshift(note);
+  }
 
   return columnSettings.length > 0 ? `[${columnSettings.join(', ')}]` : '';
 };

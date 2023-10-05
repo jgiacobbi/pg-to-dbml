@@ -6,11 +6,13 @@ const getReferencedEnums = require('../queries/getReferencedEnums');
 const getConstraints = require('../queries/getConstraints');
 
 const getPrimaryKey = (schema, tableName, constraints) => {
-  if (!constraints) return undefined;
+  if (!constraints) {
+    return undefined;
+  }
 
-  return constraints.find(({ constraintType, fromSchema, fromTable }) => {
-    return fromSchema === schema && fromTable === tableName && constraintType === 'PRIMARY KEY';
-  });
+  return constraints.find(
+    ({ constraintType, fromSchema, fromTable }) => fromSchema === schema && fromTable === tableName && constraintType === 'PRIMARY KEY',
+  );
 };
 
 /**
@@ -30,14 +32,14 @@ const getPrimaryKey = (schema, tableName, constraints) => {
  */
 
 async function getAllTables(schemas, skipTables) {
-  const allTablesPromises = schemas.map(async schema => {
+  const allTablesPromises = schemas.map(async (schema) => {
     const tables = await getTablesInSchema(schema, skipTables);
     const constraints = await getConstraints(schema);
 
     return {
       constraints,
       schema,
-      tables
+      tables,
     };
   });
 
@@ -45,24 +47,24 @@ async function getAllTables(schemas, skipTables) {
 }
 
 async function getTableStructuresForSchema({ schema, tables, constraints }) {
-  const promises = tables.map(async tableName => {
+  const promises = tables.map(async (tableName) => {
     const structure = await getTableStructure(schema, tableName);
     const primaryKey = getPrimaryKey(schema, tableName, constraints);
     const comment = await getTableComment(schema, tableName);
 
-    const structureWithConstraints = structure.map(column => {
+    const structureWithConstraints = structure.map((column) => {
       const isPrimary = primaryKey && primaryKey.fromColumns.includes(column.ordinal_position);
 
       return {
         ...column,
-        isPrimary
+        isPrimary,
       };
     });
 
     return {
+      comment,
       structure: structureWithConstraints,
       tableName,
-      comment
     };
   });
 
@@ -74,24 +76,27 @@ async function getTableStructuresForSchema({ schema, tables, constraints }) {
 module.exports = async function getDbSchemaStructures(argv) {
   const { s: includeSchemas, S: skipSchemas, T: skipTables } = argv;
 
-  if (skipSchemas && skipSchemas.length > 0)
+  if (skipSchemas && skipSchemas.length > 0) {
     console.log(`will skip schemas ${skipSchemas.join(', ')}`);
+  }
   const schemas = await getSchemas(includeSchemas, skipSchemas);
 
-  if (!schemas || schemas.length === 0) return undefined;
+  if (!schemas || schemas.length === 0) {
+    return undefined;
+  }
 
   const allTables = await getAllTables(schemas, skipTables);
 
   const getAllColumnDefs = allTables.map(async ({ constraints, schema, tables }) => {
     const allTableStructures = await getTableStructuresForSchema({ constraints, schema, tables });
 
-    const enums = await getReferencedEnums({ schema, allTableStructures });
+    const enums = await getReferencedEnums({ allTableStructures, schema });
 
     return {
       constraints,
-      schema,
       enums,
-      tables: allTableStructures
+      schema,
+      tables: allTableStructures,
     };
   });
 

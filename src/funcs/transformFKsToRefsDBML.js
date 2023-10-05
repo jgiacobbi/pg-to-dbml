@@ -4,17 +4,18 @@ module.exports = function transformFKsToRefsDBML(
   schemaName,
   constraints,
   includeSchemaName,
-  columnGetter
+  columnGetter,
 ) {
   // NOTE: only handling in-schema relationships... not FKs to other schemas
   //       because DBML does not yet handle that situation
   const dbml = constraints
     .filter(
-      constraint =>
-        constraint.constraintType === 'FOREIGN KEY' &&
-        (includeSchemaName ? true : constraint.toSchema === schemaName)
+      (constraint) => constraint.constraintType === 'FOREIGN KEY'
+        && (includeSchemaName ? true : constraint.toSchema === schemaName),
     )
-    .map(({ fromSchema, fromTable, fromColumns, toSchema, toTable, toColumns }) => {
+    .map(({
+      fromSchema, fromTable, fromColumns, toSchema, toTable, toColumns,
+    }) => {
       const cleanFromTable = fromTable.replace(/"/g, '');
       const cleanToTable = toTable.replace(/"/g, '');
       const foreignKey = columnGetter(fromSchema, cleanFromTable, fromColumns[0]);
@@ -31,11 +32,12 @@ module.exports = function transformFKsToRefsDBML(
       const fromString = includeSchemaName
         ? `${fromSchema}."${cleanFromTable}"`
         : `"${cleanFromTable}"`;
+
       const toString = includeSchemaName ? `"${toSchema}"."${cleanToTable}"` : `"${cleanToTable}"`;
 
       return `${EOL}Ref: ${fromString}.${foreignKey.column_name} > ${toString}.${foreignRelation.column_name}`;
     })
-    .join(``);
+    .join('');
 
   return `${dbml} ${EOL} ${EOL}`;
 };

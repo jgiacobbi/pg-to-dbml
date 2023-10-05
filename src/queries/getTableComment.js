@@ -1,7 +1,6 @@
 const db = require('../db');
 
-const tableCommentQuery = (dbName, schemaName, tableName) =>
-  `select obj_description('${schemaName}.${tableName}'::regclass)`;
+const tableCommentQuery = (dbName, schemaName, tableName) => `select obj_description('${schemaName}.${tableName}'::regclass)`;
 
 module.exports = async function getTableStructure(schemaName, tableName) {
   const query = tableCommentQuery(db.dbName, schemaName, tableName);

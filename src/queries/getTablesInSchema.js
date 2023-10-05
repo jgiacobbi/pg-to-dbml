@@ -1,10 +1,11 @@
 const db = require('../db');
 
-const getQuery = (schemaName, whereClause) =>
-  `select tablename from pg_tables pt where pt.schemaname='${schemaName}' ${whereClause};`;
+const getQuery = (schemaName, whereClause) => `select tablename from pg_tables pt where pt.schemaname='${schemaName}' ${whereClause};`;
 
-const getWhereClause = skipTables => {
-  if (!skipTables || skipTables.length === 0) return '';
+const getWhereClause = (skipTables) => {
+  if (!skipTables || skipTables.length === 0) {
+    return '';
+  }
 
   const tablesToSkip = [...(skipTables || [])];
 
@@ -22,5 +23,5 @@ module.exports = async function getTablesInSchema(schemaName, skipTables) {
   const queryGetTablesInSchema = getQuery(schemaName, whereClause);
   const res = await db.client.query(queryGetTablesInSchema);
 
-  return res.rows.map(row => row.tablename).sort();
+  return res.rows.map((row) => row.tablename).sort();
 };
