@@ -8,10 +8,12 @@ module.exports = function getColumnType(col) {
       columnType = 'varchar';
       break;
     case 'double precision':
-      columnType = 'number';
+      columnType = 'float8';
+      break;
+    case 'timestamp with time zone':
+      columnType = 'timestamptz';
       break;
     case 'timestamp':
-    case 'timestamp with time zone':
     case 'timestamp without time zone':
     case 'time without time zone':
       columnType = 'timestamp';
